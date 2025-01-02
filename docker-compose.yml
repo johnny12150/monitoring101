@@ -1,0 +1,28 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    volumes:
+      - ./config/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./config/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./config/dashboard.json:/var/lib/grafana/dashboards/node_exporter/dashboard.json
+    ports:
+      - "3000:3000"
